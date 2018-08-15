@@ -45,7 +45,7 @@ class Tokenizer {
             if(this.parseLiteral()) return this._token;
         }
 
-        if(',(#'.includes(this._text.charAt(this._pos)))
+        if(',(#"\'}\\'.includes(this._text.charAt(this._pos)))
         {
             let character: string = this._text.charAt(this._pos);
             this._char_start = this._pos;
@@ -87,13 +87,17 @@ class Tokenizer {
 export class PythonDocumentSymbolProvider implements vscode.DocumentSymbolProvider {
 
     public provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.DocumentSymbol[] {
+
+        console.log('parsing:' + document.fileName);
+
         let results: vscode.DocumentSymbol[] = [];
 
         let root: vscode.DocumentSymbol;
         root = new vscode.DocumentSymbol('Imports', '', vscode.SymbolKind.Namespace, new vscode.Range(0, 0, 0, 10), new vscode.Range(0, 0, 0, 10));
         results.push(root);
 
-        let current_class: vscode.DocumentSymbol;
+        let current_class_set: boolean = false;
+        let current_class: vscode.DocumentSymbol = new vscode.DocumentSymbol('dummy', 'details', 0, new vscode.Range(0, 0, 0, 0), new vscode.Range(0, 0, 0, 0));
         let current_class_depth: number = 0;
 
         for (let index = 0; index < document.lineCount; index++) {
@@ -116,6 +120,8 @@ export class PythonDocumentSymbolProvider implements vscode.DocumentSymbolProvid
                         let import_name: string = tokenizer.next();
                         if(import_name == '') break;
 
+                        console.log('adding import:' + import_name + ' from:' + module);
+
                         root.children.push(new vscode.DocumentSymbol(import_name, ' from ' + module, vscode.SymbolKind.Interface, tokenizer.range(), tokenizer.range()));
 
                         if(tokenizer.next() == ',') continue;
@@ -127,11 +133,10 @@ export class PythonDocumentSymbolProvider implements vscode.DocumentSymbolProvid
 
             if(token == 'import')
             {
-                console.log('parsing import');
                 do{
                     let import_name: string = tokenizer.next();
 
-                    console.log('import_name:' + import_name);
+                    console.log('adding import:' + import_name);
 
                     if(import_name == '') break;
 
@@ -155,8 +160,11 @@ export class PythonDocumentSymbolProvider implements vscode.DocumentSymbolProvid
                     details += inherits + ' ';
                 }
 
+                console.log('adding class:' + class_name);
+
                 current_class = new vscode.DocumentSymbol(class_name, details, vscode.SymbolKind.Class, class_range, class_range);
                 current_class_depth = text.firstNonWhitespaceCharacterIndex;
+                current_class_set = true;
 
                 results.push(current_class);
             }
@@ -166,10 +174,13 @@ export class PythonDocumentSymbolProvider implements vscode.DocumentSymbolProvid
                 let function_name: string = tokenizer.next();
                 let function_range: vscode.Range = tokenizer.range();
 
-                if(current_class != undefined && text.firstNonWhitespaceCharacterIndex > current_class_depth)
+                if(current_class_set && text.firstNonWhitespaceCharacterIndex > current_class_depth)
                 {
+                    console.log('adding method:' + function_name + ' to class:' + current_class.name);
                     current_class.children.push(new vscode.DocumentSymbol(function_name, '', vscode.SymbolKind.Method, function_range, function_range));
                 }else{
+                    current_class_set = false;
+                    console.log('adding function:' + function_name);
                     results.push(new vscode.DocumentSymbol(function_name, '', vscode.SymbolKind.Function, function_range, function_range));
                 }
             }

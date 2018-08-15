@@ -1,7 +1,7 @@
 {
-    "name": "vspython",
-    "displayName": "vsPython",
-    "description": "Python Language",
+    "name": "vscode-python-outline",
+    "displayName": "Python Outline",
+    "description": "Python Language Outline",
     "version": "0.0.1",
     "publisher": "zimmer",
     "engines": {
@@ -14,19 +14,6 @@
         "onLanguage:python"
     ],
     "main": "./out/extension",
-    "contributes": {
-        "languages": [{
-            "id": "python",
-            "aliases": ["Python", "python"],
-            "extensions": [".py"],
-            "configuration": "./language-configuration.json"
-        }],
-        "grammars": [{
-            "language": "python",
-            "scopeName": "source.python",
-            "path": "./syntaxes/python.tmLanguage.json"
-        }]
-    },
     "scripts": {
         "vscode:prepublish": "npm run compile",
         "compile": "tsc -p ./",
