@@ -1,0 +1,43 @@
+{
+    "name": "vspython",
+    "displayName": "vsPython",
+    "description": "Python Language",
+    "version": "0.0.1",
+    "publisher": "zimmer",
+    "engines": {
+        "vscode": "^1.25.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "activationEvents": [
+        "onLanguage:python"
+    ],
+    "main": "./out/extension",
+    "contributes": {
+        "languages": [{
+            "id": "python",
+            "aliases": ["Python", "python"],
+            "extensions": [".py"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "python",
+            "scopeName": "source.python",
+            "path": "./syntaxes/python.tmLanguage.json"
+        }]
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "npm run compile && node ./node_modules/vscode/bin/test"
+    },
+    "devDependencies": {
+        "typescript": "^2.6.1",
+        "vscode": "^1.1.6",
+        "@types/node": "^7.0.43",
+        "@types/mocha": "^2.2.42"
+    }
+}
